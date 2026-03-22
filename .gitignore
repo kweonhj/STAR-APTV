@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Virtual env
+.venv/
+env/
+venv/
+
+# Logs
+*.log
+
+# Large data / outputs
+*.npy
+*.npz
+*.joblib
+*.pt
+*.pth
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+
+# Result folders
+results/
+plots/
+model/
