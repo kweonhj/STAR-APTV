@@ -240,6 +240,8 @@ torchvision==0.23.0
 torchaudio==2.8.0
 pillow==11.3.0
 SAM-2==1.0
+```
+
 Install with:
 
 ```bash
