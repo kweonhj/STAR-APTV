@@ -11,7 +11,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Virtual env
+# Virtual environments
 .venv/
 env/
 venv/
@@ -19,20 +19,18 @@ venv/
 # Logs
 *.log
 
-# Large data / outputs
-*.npy
-*.npz
-*.joblib
-*.pt
-*.pth
-*.csv
-*.png
-*.jpg
-*.jpeg
-*.tif
-*.tiff
+# Ignore heavy intermediate folders
+Calibration/LD_cal_raw/
+Calibration/LD_cal_gamma/
+Calibration/LD_cal_seg/
+Calibration/LD_cal_efd/
+Calibration/LD_cal_model/
 
-# Result folders
-results/
-plots/
-model/
+Experiment/LD_exp_raw/
+Experiment/LD_exp_gamma/
+Experiment/LD_exp_seg/
+Experiment/LD_exp_efd/
+
+# Keep result folder
+!Experiment/LD_exp_result_mcdo/
+!Experiment/LD_exp_result_mcdo/**
