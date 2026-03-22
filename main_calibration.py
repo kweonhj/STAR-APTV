@@ -17,7 +17,7 @@ ORIG_DIR = "/data1/jaejung/others/hyeokjin/sam2/notebooks/ForGit/Calibration/LD_
 GAMMA_DIR = "/data1/jaejung/others/hyeokjin/sam2/notebooks/ForGit/Calibration/LD_cal_gamma"
 SEG_DIR = "/data1/jaejung/others/hyeokjin/sam2/notebooks/ForGit/Calibration/LD_cal_seg"
 EFD_DIR = "/data1/jaejung/others/hyeokjin/sam2/notebooks/ForGit/Calibration/LD_cal_efd"
-MODEL_DIR = "/data1/jaejung/others/hyeokjin/sam2/notebooks/ForGit/Calibration/LD_cal_model/efd0001"
+MODEL_DIR = "/data1/jaejung/others/hyeokjin/sam2/notebooks/ForGit/Calibration/LD_cal_model"
 
 DEVICE = "cuda:1"
 
