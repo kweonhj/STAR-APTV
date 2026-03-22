@@ -220,26 +220,43 @@ all_exp_pred_mcdo.csv
 
 ## Dependencies
 
-Typical Python dependencies include:
+## Dependencies
+
+Tested environment:
 
 ```text
-numpy
-scipy
-matplotlib
-opencv-python
-scikit-image
-scikit-learn
-joblib
-tifffile
-pyefd
-torch
-Pillow
-```
-
+python==3.10
+numpy==2.2.6
+scipy==1.15.3
+matplotlib==3.10.6
+opencv-python==4.12.0.88
+scikit-image==0.25.2
+scikit-learn==1.7.2
+joblib==1.5.2
+tifffile==2025.5.10
+pyefd==1.6.0
+torch==2.8.0
+torchvision==0.23.0
+torchaudio==2.8.0
+pillow==11.3.0
+SAM-2==1.0
 Install with:
 
 ```bash
-pip install numpy scipy matplotlib opencv-python scikit-image scikit-learn joblib tifffile pyefd torch Pillow
+pip install \
+  numpy==2.2.6 \
+  scipy==1.15.3 \
+  matplotlib==3.10.6 \
+  opencv-python==4.12.0.88 \
+  scikit-image==0.25.2 \
+  scikit-learn==1.7.2 \
+  joblib==1.5.2 \
+  tifffile==2025.5.10 \
+  pyefd==1.6.0 \
+  torch==2.8.0 \
+  torchvision==0.23.0 \
+  torchaudio==2.8.0 \
+  pillow==11.3.0
 ```
 
 ---
