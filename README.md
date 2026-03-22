@@ -61,3 +61,196 @@ The implementation in this repository focuses on the following stages:
 ├── infer.py                 # MC-Dropout inference on validation / experiment data
 ├── plot_result.py           # plotting utilities for inference results
 └── README.md
+```
+
+---
+
+## Pipeline
+
+### 1. Calibration pipeline
+
+The calibration pipeline performs:
+
+- raw TIFF conversion
+- gamma preprocessing
+- SAM2 segmentation
+- EFD/intensity feature extraction
+- RANSAC-based calibration filtering
+- MC-Dropout training
+
+Run:
+
+```bash
+python main_calibration.py
+```
+
+### 2. Validation / experiment pipeline
+
+The validation pipeline performs:
+
+- raw TIFF conversion
+- gamma preprocessing
+- SAM2 segmentation
+- EFD/intensity feature extraction using calibration-derived bbox statistics
+- MC-Dropout inference using the calibration-trained model
+
+Run:
+
+```bash
+python main_validation.py
+```
+
+---
+
+## Data Convention
+
+This code assumes indexed file naming for both calibration and validation data.
+
+### Image naming
+
+```text
+0001.tif
+0002.tif
+0003.tif
+...
+```
+
+### Intermediate outputs
+
+```text
+0001.png
+Seg_0001.npy
+EFD_Seg_0001.npy
+```
+
+The pipeline relies on consistent indexing across:
+- raw images
+- gamma-corrected images
+- segmentation outputs
+- EFD outputs
+
+---
+
+## Main Components
+
+### Preprocessing
+`prep.py`
+- robust TIFF loading
+- single-channel conversion
+- max-based normalization to 8-bit
+- gamma correction
+
+### Segmentation
+`save_mask.py`
+- SAM2 automatic mask generation
+- phase-locked grid shifting
+- segmentation export as `.npy`
+
+### EFD feature extraction
+`save_efd.py`
+- contour reconstruction via elliptic Fourier descriptors
+- intensity feature extraction
+- bbox estimation
+- IoU-based duplicate suppression
+
+### Calibration filtering
+`cal_ransac.py`
+- RANSAC-based feature filtering
+- low-variance feature removal
+- standardization and scaler export
+- bbox statistics export
+
+### MC-Dropout regression
+`mc_dropout.py`
+- MLP regressor with BatchNorm and Dropout
+- uncertainty-aware regression
+- tau threshold estimation from calibration uncertainty distribution
+
+### Experiment inference
+`infer.py`
+- feature loading from experiment EFD outputs
+- calibration-consistent masking and scaling
+- MC-Dropout prediction with uncertainty
+- CSV export of filtered predictions
+
+---
+
+## Output Files
+
+Typical calibration outputs include:
+
+```text
+calibration_features.npy
+calibration_features_normed.npy
+scaler_calib.joblib
+feature_mask.npy
+stats_bbox.npy
+bnn_mcdo.pt
+sigma_threshold_tau_bnn.npy
+```
+
+Typical validation outputs include:
+
+```text
+EFD_Seg_0001.npy
+EFD_Seg_0002.npy
+...
+all_exp_pred_mcdo.csv
+```
+
+---
+
+## Dependencies
+
+Typical Python dependencies include:
+
+```text
+numpy
+scipy
+matplotlib
+opencv-python
+scikit-image
+scikit-learn
+joblib
+tifffile
+pyefd
+torch
+Pillow
+```
+
+Install with:
+
+```bash
+pip install numpy scipy matplotlib opencv-python scikit-image scikit-learn joblib tifffile pyefd torch Pillow
+```
+
+---
+
+## Notes
+
+- Absolute paths are currently used in the scripts and should be adapted to your local environment.
+- Large raw data, intermediate segmentation results, and trained model files are not intended to be version-controlled in GitHub by default.
+- This repository is designed around the experimental and calibration file conventions used in the STAR-APTV study.
+
+---
+
+## Citation
+
+If you use this code, please cite:
+
+```bibtex
+@article{PARK2026120368,
+  title   = {STAR-APTV: Deep learning-enabled 3D flow reconstruction in evaporating multicomponent droplets},
+  journal = {Measurement},
+  volume  = {266},
+  pages   = {120368},
+  year    = {2026},
+  author  = {Bumsoo Park and Julius Mauch and Hyeokjin Kweon and Jochen Kriegseis and Seungchul Lee and Hyoungsoo Kim}
+}
+```
+
+---
+
+## Contact
+
+For questions regarding the code or implementation details, please contact the authors of the paper.
