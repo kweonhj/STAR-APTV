@@ -2,7 +2,7 @@
 
 Deep learning-enabled 3D flow reconstruction in evaporating multicomponent droplets
 
-This repository contains the core code used for the **STAR-APTV** pipeline proposed in:
+This repository contains the code used for the **STAR-APTV** pipeline proposed in:
 
 **Bumsoo Park, Julius Mauch, Hyeokjin Kweon, Jochen Kriegseis, Seungchul Lee, Hyoungsoo Kim**  
 *STAR-APTV: Deep learning-enabled 3D flow reconstruction in evaporating multicomponent droplets*  
@@ -14,40 +14,41 @@ This repository contains the core code used for the **STAR-APTV** pipeline propo
 
 STAR-APTV is a deep learning-assisted astigmatic particle tracking velocimetry pipeline for robust 3D particle reconstruction from single-camera microscopic images.
 
-The implementation in this repository focuses on the following stages:
+This repository implements the following stages:
 
-1. **Raw image conversion and preprocessing**
+1. Raw image conversion and preprocessing
    - TIFF to PNG conversion
-   - gamma correction
    - grayscale normalization
+   - gamma correction
 
-2. **Particle segmentation**
+2. Particle segmentation
    - SAM2-based automatic mask generation
-   - phase-locked mask generation for improved spatial robustness
+   - phase-locked mask generation for improved robustness
 
-3. **Shape and intensity feature extraction**
+3. Shape and intensity feature extraction
    - elliptic Fourier descriptor (EFD)-based contour refinement
-   - intensity-based feature extraction inside each refined particle mask
-   - bounding-box-based filtering for validation/experiment data
+   - intensity-based feature extraction
+   - bounding-box-based filtering for validation / experiment data
 
-4. **Calibration feature construction**
-   - RANSAC-based filtering of calibration particles
+4. Calibration feature construction
+   - RANSAC-based calibration filtering
+   - low-variance feature removal
    - feature masking and normalization
    - calibration statistics extraction
 
-5. **Depth regression**
+5. Depth regression
    - MC-Dropout-based regression model
    - predictive uncertainty estimation
    - uncertainty thresholding using calibration-derived tau
 
-6. **Validation / experiment inference**
+6. Validation / experiment inference
    - EFD feature extraction on experiment images
    - MC-Dropout inference across all frames
-   - aggregated CSV export for downstream visualization and reconstruction
+   - CSV export for downstream reconstruction and visualization
 
 ---
 
-## Directory Structure
+## Repository Structure
 
 ```text
 .
@@ -56,7 +57,7 @@ The implementation in this repository focuses on the following stages:
 │   ├── LD_cal_gamma/        # gamma-corrected calibration images
 │   ├── LD_cal_seg/          # SAM2 segmentation outputs for calibration
 │   ├── LD_cal_efd/          # EFD/intensity feature outputs for calibration
-│   └── LD_cal_model/        # calibration statistics, scaler, feature mask, MC-Dropout model, tau
+│   └── LD_cal_model/        # calibration statistics, scaler, feature mask, trained model, tau
 │
 ├── Experiment/
 │   ├── LD_exp_raw/          # renamed / converted experiment raw images
@@ -78,8 +79,131 @@ The implementation in this repository focuses on the following stages:
 ├── mc_dropout.py
 ├── infer.py
 ├── plot_result.py
+├── requirements.txt
 ├── .gitignore
 └── README.md
+```
+
+---
+
+## Data Organization
+
+The repository separates original raw images from generated pipeline outputs.
+
+- `Imagesets/` contains the original calibration and experiment TIFF images.
+- `Calibration/` contains all generated outputs derived from calibration raw images.
+- `Experiment/` contains all generated outputs derived from experiment raw images.
+
+In other words, the raw source images are stored under `Imagesets/`, while all intermediate and final outputs produced by the code are written into either `Calibration/` or `Experiment/`.
+
+---
+
+## File Naming Convention
+
+The code assumes indexed file naming.
+
+### Raw images
+
+```text
+0001.tif
+0002.tif
+0003.tif
+...
+```
+
+### Converted / processed images
+
+```text
+0001.png
+0002.png
+...
+```
+
+### Intermediate outputs
+
+```text
+Seg_0001.npy
+Seg_0002.npy
+EFD_Seg_0001.npy
+EFD_Seg_0002.npy
+...
+```
+
+The pipeline relies on consistent indexing across:
+- raw images
+- gamma-corrected images
+- segmentation outputs
+- EFD outputs
+
+---
+
+## Main Scripts
+
+### `main_calibration.py`
+Runs the full calibration pipeline:
+- TIFF conversion
+- gamma preprocessing
+- SAM2 segmentation
+- EFD/intensity feature extraction
+- RANSAC-based calibration feature generation
+- MC-Dropout training
+
+### `main_validation.py`
+Runs the full validation / experiment pipeline:
+- TIFF conversion
+- gamma preprocessing
+- SAM2 segmentation
+- EFD/intensity feature extraction with calibration-derived bbox statistics
+- MC-Dropout inference on experiment frames
+
+---
+
+## Core Modules
+
+### `prep.py`
+Preprocessing utilities:
+- robust TIFF loading
+- single-channel conversion
+- max-based normalization to 8-bit
+- gamma correction
+
+### `save_mask.py`
+SAM2 segmentation utilities:
+- automatic mask generation
+- phase-locked grid shifting
+- segmentation export as `.npy`
+
+### `save_efd.py`
+Shape and intensity feature extraction:
+- contour refinement via elliptic Fourier descriptors
+- intensity feature extraction
+- bbox estimation
+- IoU-based duplicate suppression
+- separate routines for calibration and validation / experiment data
+
+### `cal_ransac.py`
+Calibration feature processing:
+- RANSAC-based filtering
+- low-variance feature removal
+- scaler generation
+- feature mask generation
+- bbox statistics export
+
+### `mc_dropout.py`
+Calibration-time regression training:
+- MLP regressor with BatchNorm and Dropout
+- uncertainty-aware MC-Dropout regression
+- tau threshold estimation from calibration uncertainty
+
+### `infer.py`
+Validation-time inference:
+- feature loading from experiment EFD outputs
+- calibration-consistent masking and scaling
+- MC-Dropout prediction with uncertainty
+- aggregated CSV export
+
+### `plot_result.py`
+Visualization utilities for experiment inference results.
 
 ---
 
@@ -89,11 +213,11 @@ The implementation in this repository focuses on the following stages:
 
 The calibration pipeline performs:
 
-- raw TIFF conversion
+- conversion of raw TIFF images
 - gamma preprocessing
 - SAM2 segmentation
 - EFD/intensity feature extraction
-- RANSAC-based calibration filtering
+- RANSAC-based calibration feature filtering
 - MC-Dropout training
 
 Run:
@@ -106,7 +230,7 @@ python main_calibration.py
 
 The validation pipeline performs:
 
-- raw TIFF conversion
+- conversion of raw TIFF images
 - gamma preprocessing
 - SAM2 segmentation
 - EFD/intensity feature extraction using calibration-derived bbox statistics
@@ -120,82 +244,11 @@ python main_validation.py
 
 ---
 
-## Data Convention
+## Typical Outputs
 
-This code assumes indexed file naming for both calibration and validation data.
+### Calibration outputs
 
-### Image naming
-
-```text
-0001.tif
-0002.tif
-0003.tif
-...
-```
-
-### Intermediate outputs
-
-```text
-0001.png
-Seg_0001.npy
-EFD_Seg_0001.npy
-```
-
-The pipeline relies on consistent indexing across:
-- raw images
-- gamma-corrected images
-- segmentation outputs
-- EFD outputs
-
----
-
-## Main Components
-
-### Preprocessing
-`prep.py`
-- robust TIFF loading
-- single-channel conversion
-- max-based normalization to 8-bit
-- gamma correction
-
-### Segmentation
-`save_mask.py`
-- SAM2 automatic mask generation
-- phase-locked grid shifting
-- segmentation export as `.npy`
-
-### EFD feature extraction
-`save_efd.py`
-- contour reconstruction via elliptic Fourier descriptors
-- intensity feature extraction
-- bbox estimation
-- IoU-based duplicate suppression
-
-### Calibration filtering
-`cal_ransac.py`
-- RANSAC-based feature filtering
-- low-variance feature removal
-- standardization and scaler export
-- bbox statistics export
-
-### MC-Dropout regression
-`mc_dropout.py`
-- MLP regressor with BatchNorm and Dropout
-- uncertainty-aware regression
-- tau threshold estimation from calibration uncertainty distribution
-
-### Experiment inference
-`infer.py`
-- feature loading from experiment EFD outputs
-- calibration-consistent masking and scaling
-- MC-Dropout prediction with uncertainty
-- CSV export of filtered predictions
-
----
-
-## Output Files
-
-Typical calibration outputs include:
+Typical files produced under `Calibration/LD_cal_model/` include:
 
 ```text
 calibration_features.npy
@@ -207,25 +260,26 @@ bnn_mcdo.pt
 sigma_threshold_tau_bnn.npy
 ```
 
-Typical validation outputs include:
+### Experiment outputs
+
+Typical files produced under `Experiment/LD_exp_result_mcdo/` include:
 
 ```text
-EFD_Seg_0001.npy
-EFD_Seg_0002.npy
-...
 all_exp_pred_mcdo.csv
+plot_3d_scatter.png
+plot_top_view_xy_zcolor.png
+plot_side_view_xz.png
+plot_uncertainty_hist.png
+plot_framewise_summary.png
 ```
 
 ---
 
 ## Dependencies
 
-## Dependencies
-
 Tested environment:
 
 ```text
-python==3.10
 numpy==2.2.6
 scipy==1.15.3
 matplotlib==3.10.6
@@ -238,27 +292,20 @@ pyefd==1.6.0
 torch==2.8.0
 torchvision==0.23.0
 torchaudio==2.8.0
-pillow==11.3.0
-SAM-2==1.0
+Pillow==11.3.0
 ```
 
-Install with:
+Install the core dependencies with:
 
 ```bash
-pip install \
-  numpy==2.2.6 \
-  scipy==1.15.3 \
-  matplotlib==3.10.6 \
-  opencv-python==4.12.0.88 \
-  scikit-image==0.25.2 \
-  scikit-learn==1.7.2 \
-  joblib==1.5.2 \
-  tifffile==2025.5.10 \
-  pyefd==1.6.0 \
-  torch==2.8.0 \
-  torchvision==0.23.0 \
-  torchaudio==2.8.0 \
-  pillow==11.3.0
+pip install -r requirements.txt
+```
+
+For SAM2, install the local package separately from your cloned SAM2 repository, for example:
+
+```bash
+cd /path/to/sam2
+pip install -e .
 ```
 
 ---
@@ -266,8 +313,8 @@ pip install \
 ## Notes
 
 - Absolute paths are currently used in the scripts and should be adapted to your local environment.
-- Large raw data, intermediate segmentation results, and trained model files are not intended to be version-controlled in GitHub by default.
-- This repository is designed around the experimental and calibration file conventions used in the STAR-APTV study.
+- Large raw data, intermediate segmentation results, and trained model files are not intended to be version-controlled by default.
+- The repository is organized so that original TIFF images remain under `Imagesets/`, while generated outputs are stored under `Calibration/` and `Experiment/`.
 
 ---
 
