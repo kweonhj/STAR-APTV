@@ -47,21 +47,39 @@ The implementation in this repository focuses on the following stages:
 
 ---
 
-## Repository Structure
+## Directory Structure
 
 ```text
 .
-├── main_calibration.py      # end-to-end calibration pipeline
-├── main_validation.py       # end-to-end validation / experiment pipeline
-├── prep.py                  # preprocessing: TIFF loading, normalization, gamma correction
-├── save_mask.py             # SAM2 segmentation
-├── save_efd.py              # EFD/intensity feature extraction
-├── cal_ransac.py            # calibration feature filtering and scaler generation
-├── mc_dropout.py            # MC-Dropout training on calibration data
-├── infer.py                 # MC-Dropout inference on validation / experiment data
-├── plot_result.py           # plotting utilities for inference results
+├── Calibration/
+│   ├── LD_cal_raw/          # renamed / converted calibration raw images
+│   ├── LD_cal_gamma/        # gamma-corrected calibration images
+│   ├── LD_cal_seg/          # SAM2 segmentation outputs for calibration
+│   ├── LD_cal_efd/          # EFD/intensity feature outputs for calibration
+│   └── LD_cal_model/        # calibration statistics, scaler, feature mask, MC-Dropout model, tau
+│
+├── Experiment/
+│   ├── LD_exp_raw/          # renamed / converted experiment raw images
+│   ├── LD_exp_gamma/        # gamma-corrected experiment images
+│   ├── LD_exp_seg/          # SAM2 segmentation outputs for experiment data
+│   ├── LD_exp_efd/          # EFD/intensity feature outputs for experiment data
+│   └── LD_exp_result_mcdo/  # MC-Dropout inference results
+│
+├── Imagesets/
+│   ├── LD_cal/              # original calibration TIFF images
+│   └── LD_exp/              # original experiment TIFF images
+│
+├── main_calibration.py
+├── main_validation.py
+├── prep.py
+├── save_mask.py
+├── save_efd.py
+├── cal_ransac.py
+├── mc_dropout.py
+├── infer.py
+├── plot_result.py
+├── .gitignore
 └── README.md
-```
 
 ---
 
